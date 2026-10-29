@@ -7,8 +7,10 @@ import com.edwin.almacen.enums.Categoria;
 import com.edwin.almacen.exceptions.RecursoNoEncontradoException;
 import com.edwin.almacen.mappers.ProductoMapper;
 import com.edwin.almacen.repositories.ProductoRepository;
+import com.edwin.almacen.repositories.specs.ProductoSpecs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +32,14 @@ public class ProductoServiceImpl implements ProductoService{
     public List<ProductoResponse> listar(
             String nombre, String categoria,
             BigDecimal precioMin, BigDecimal precioMax) {
-
+/*
         log.info("Listando todos los productos");
 
         return productoRepository.findAll().stream()
                 //.map(productoMappe -> )
-                .map(productoMapper::entidadAResponse).toList();
+                .map(productoMapper::entidadAResponse).toList();*/
+        Specification<Producto> specification = ProductoSpecs.filtros(nombre, categoria, precioMin, precioMax);
+        return productoRepository.findAll(specification).stream().map(productoMapper::entidadAResponse).toList();
     }
 
     @Override
