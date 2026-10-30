@@ -10,6 +10,7 @@ import com.edwin.almacen.entities.Sucursal;
 import com.edwin.almacen.entities.Venta;
 import com.edwin.almacen.enums.EstadoVenta;
 import com.edwin.almacen.exceptions.RecursoNoEncontradoException;
+import com.edwin.almacen.mappers.DetalleVentaMapper;
 import com.edwin.almacen.mappers.VentaMapper;
 import com.edwin.almacen.repositories.ProductoRepository;
 import com.edwin.almacen.repositories.SucursalRepository;
@@ -30,7 +31,7 @@ public class VentaServiceImpl implements VentaService{
     private final ProductoRepository productoRepository;
     private final SucursalRepository sucursalRepository;
     private final VentaMapper ventaMapper;
-    private final DetalleVentaService detalleVentaService;
+    private final DetalleVentaMapper detalleVentaMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -85,10 +86,27 @@ public class VentaServiceImpl implements VentaService{
 
         Venta venta = ventaMapper.requestAEntidad(request, sucursal);
 
-        detalleVentaService.prepararDetalles(
-                request.productos(),
-                venta
-        );
+        for (DetalleVentaRequest itemDto : request.productos()) {
+
+            Producto producto = productoRepository.findById(itemDto.idProducto())
+                    .orElseThrow(() -> new RecursoNoEncontradoException(
+                            "Producto no encontrado con id: " + itemDto.idProducto()
+                    ));
+
+            int cantidad = Math.toIntExact(itemDto.cantidadProducto());
+
+            // Descontamos el stock del producto.
+            producto.descontarCantidad(cantidad);
+
+            // El mapper construye el detalle con el precio actual del producto.
+            DetalleVenta detalle = detalleVentaMapper.requestAEntidad(
+                    producto,
+                    cantidad
+            );
+
+            // Agregamos el detalle a la venta.
+            venta.agregarDetalle(detalle);
+        }
 
         Venta ventaGuardada = ventaRepository.save(venta);
 
@@ -99,50 +117,6 @@ public class VentaServiceImpl implements VentaService{
 
         return ventaMapper.entidadAResponse(ventaGuardada);
     }
-
-/*
-    @Override
-    public VentaResponse registrar(VentaRequest request) {
-        log.info("Iniciando registro de venta para la sucursal ID: {}", request.idSucursal());
-
-        Sucursal sucursal = sucursalRepository.findById(request.idSucursal())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada con id: " + request.idSucursal()));
-
-        Venta venta = Venta.builder()
-                .estadoVenta(EstadoVenta.REGISTRADA)
-                .fecha(LocalDate.now())
-                .sucursal(sucursal)
-                .build();
-
-        Venta venta = Venta.builder()
-                .estadoVenta(EstadoVenta.REGISTRADA)
-                .fecha(LocalDate.now())
-                .sucursal(sucursal)
-                .build();
-
-        for (DetalleVentaRequest itemDto : request.productos()) {
-            Producto producto = productoRepository.findById(itemDto.idProducto())
-                    .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con id: " + itemDto.idProducto()));
-
-            int cantidadSolicitada = Math.toIntExact(itemDto.cantidadProducto());
-            producto.descontarCantidad(cantidadSolicitada);
-            productoRepository.save(producto);
-
-            // Fotografía del Precio: Asignamos estrictamente el precio actual de la tabla PRODUCTOS
-            DetalleVenta detalle = DetalleVenta.builder()
-                    .producto(producto)
-                    .cantidadProducto(cantidadSolicitada)
-                    .precioProducto(producto.getPrecio())
-                    .build();
-
-            venta.agregarDetalle(detalle);
-        }
-
-        Venta ventaGuardada = ventaRepository.save(venta);
-        log.info("Venta registrada con éxito bajo el ID: {}", ventaGuardada.getId());
-
-        return ventaMapper.entidadAResponse(ventaGuardada);
-    }*/
 
     @Override
     public void cancelar(Long id) {
@@ -167,7 +141,7 @@ public class VentaServiceImpl implements VentaService{
 
         return ventaRepository.findById(id).orElseThrow(
                 () -> new RecursoNoEncontradoException(
-                        "Sucursal no encontrada con id: {}" + id
+                        "Venta no encontrada con id: " + id
                 )
         );
     }

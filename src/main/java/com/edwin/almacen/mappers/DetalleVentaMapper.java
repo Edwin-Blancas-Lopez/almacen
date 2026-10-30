@@ -11,13 +11,11 @@ import java.math.BigDecimal;
 @Component
 public class DetalleVentaMapper {
 
-    public DetalleVenta requestAEntidad(Producto producto, DetalleVentaRequest request
+    public DetalleVenta requestAEntidad(Producto producto, int cantidad
     ) {
-        if (producto == null || request == null) {
+        if (producto == null) {
             return null;
         }
-
-        int cantidad = Math.toIntExact(request.cantidadProducto());
 
         return DetalleVenta.builder()
                 .producto(producto)

@@ -12,7 +12,6 @@ import java.util.List;
 public interface VentaRepository extends JpaRepository<Venta, Long> {
     List<Venta> findByEstadoVenta(EstadoVenta estadoVenta);
 
-
     @Query("""
         SELECT new com.edwin.almacen.dto.ventas.ReporteVentasSucursalResponse(
             s.id,
