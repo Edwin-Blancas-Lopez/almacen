@@ -1,5 +1,5 @@
 
-package com.edwin.almacen.services.ventas;
+/*package com.edwin.almacen.services.ventas;
 
 import com.edwin.almacen.dto.ventas.DetalleVentaRequest;
 import com.edwin.almacen.entities.DetalleVenta;
@@ -43,7 +43,7 @@ public class DetalleVentaServiceImpl implements DetalleVentaService {
             producto.descontarCantidad(cantidadSolicitada);
 
             DetalleVenta detalle =
-                    detalleVentaMapper.requestAEntidad(producto, itemDto);
+                    detalleVentaMapper.requestAEntidad(producto, cantidadSolicitada);
 
             venta.agregarDetalle(detalle);
             detalles.add(detalle);
@@ -51,4 +51,4 @@ public class DetalleVentaServiceImpl implements DetalleVentaService {
 
         return detalles;
     }
-}
+}*/

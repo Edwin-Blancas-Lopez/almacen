@@ -4,6 +4,7 @@ import com.edwin.almacen.dto.productos.ProductoRequest;
 import com.edwin.almacen.dto.productos.ProductoResponse;
 import com.edwin.almacen.entities.Producto;
 import com.edwin.almacen.enums.Categoria;
+import com.edwin.almacen.exceptions.DatoInvalidoException;
 import com.edwin.almacen.exceptions.RecursoNoEncontradoException;
 import com.edwin.almacen.mappers.ProductoMapper;
 import com.edwin.almacen.repositories.ProductoRepository;
@@ -32,9 +33,15 @@ public class ProductoServiceImpl implements ProductoService{
     public List<ProductoResponse> listar(
             String nombre, String categoria,
             BigDecimal precioMin, BigDecimal precioMax) {
-/*
-        log.info("Listando todos los productos");
 
+        log.info("Listando los productos en base al filtro");
+
+        // Validación cruzada de precios: El mínimo no puede ser mayor que el máximo
+        if (precioMin != null && precioMax != null && precioMin.compareTo(precioMax) > 0) {
+            log.warn("Intento de filtrado inválido: el precio mínimo ({}) es mayor que el precio máximo ({}).", precioMin, precioMax);
+            throw new DatoInvalidoException("El precio mínimo no puede ser mayor que el precio máximo.");
+        }
+        /*
         return productoRepository.findAll().stream()
                 //.map(productoMappe -> )
                 .map(productoMapper::entidadAResponse).toList();*/

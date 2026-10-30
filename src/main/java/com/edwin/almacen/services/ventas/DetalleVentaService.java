@@ -1,4 +1,4 @@
-
+/*
 package com.edwin.almacen.services.ventas;
 
 import com.edwin.almacen.dto.ventas.DetalleVentaRequest;
@@ -15,3 +15,4 @@ public interface DetalleVentaService {
     );
 }
 
+*/
